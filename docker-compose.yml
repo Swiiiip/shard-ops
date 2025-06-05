@@ -1,5 +1,3 @@
-﻿version: '3.8'
-
 services:
   shard-api:
     build:
@@ -7,7 +5,7 @@ services:
       dockerfile: Dockerfile
       args:
         API_VERSION: ${API_VERSION}
-    image: ${DOCKERHUB_USERNAME}/shard-api:${API_VERSION}
+    image: ${DOCKERHUB_USERNAME}/shard-api:latest
     ports:
       - "8080:80"
     environment:
