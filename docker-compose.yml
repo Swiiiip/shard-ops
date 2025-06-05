@@ -1,0 +1,23 @@
+﻿services:
+  shard-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80" 
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - MongoDB__BaseUri=mongodb://mongo:27017 
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo-data:/data/db 
+  
+volumes:
+  mongo-data:

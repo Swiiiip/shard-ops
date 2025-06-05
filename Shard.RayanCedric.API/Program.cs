@@ -1,0 +1,130 @@
+using System.Reflection;
+using Microsoft.OpenApi.Models;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication;
+using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
+using Shard.RayanCedric.API.BackgroundServices;
+using Shard.RayanCedric.API.Configuration;
+using Shard.RayanCedric.API.Gateway;
+using Shard.RayanCedric.API.Model.Buildings;
+using Shard.RayanCedric.API.Model.Buildings.ConstructionBuildings;
+using Shard.RayanCedric.API.Model.Buildings.EconomicBuildings;
+using Shard.RayanCedric.API.Model.Units;
+using Shard.RayanCedric.API.Model.Units.BasicUnits;
+using Shard.RayanCedric.API.Model.Units.CombatUnits;
+using Shard.RayanCedric.API.Repositories.Universe;
+using Shard.RayanCedric.API.Repositories.Users;
+using Shard.RayanCedric.API.Services;
+using Shard.Shared.Core;
+using CombatService = Shard.RayanCedric.API.Services.CombatService;
+using SystemClock = Shard.Shared.Core.SystemClock;
+using UserService = Shard.RayanCedric.API.Services.UserService;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+    });
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("V7", new OpenApiInfo
+    {
+        Version = "V7",
+        Title = "Shard.RayanCedric.API",
+    });
+
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
+    
+builder.Services.AddAuthentication("Basic")
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("Basic", null);
+
+builder.Services.AddSingleton<IClock, SystemClock>();
+builder.Services.AddSingleton<ISectorRepository, SectorRepository>();
+
+var useMongoDB = builder.Environment.IsProduction();
+
+if (useMongoDB)
+{
+    BsonClassMap.RegisterClassMap<Unit>(cm =>
+    {
+        cm.AutoMap();
+        cm.SetIsRootClass(true);
+        cm.SetDiscriminatorIsRequired(true);
+        cm.AddKnownType(typeof(Scout));
+        cm.AddKnownType(typeof(Builder));
+        cm.AddKnownType(typeof(CombatUnit));
+    });
+
+    BsonClassMap.RegisterClassMap<CombatUnit>(cm =>
+    {
+        cm.AutoMap();
+        cm.SetDiscriminatorIsRequired(true);
+        cm.AddKnownType(typeof(Bomber));
+        cm.AddKnownType(typeof(Fighter));
+        cm.AddKnownType(typeof(Cruiser));
+    });
+
+    BsonClassMap.RegisterClassMap<Building>(cm =>
+    {
+        cm.AutoMap();
+        cm.SetIsRootClass(true);
+        cm.SetDiscriminatorIsRequired(true);
+        cm.AddKnownType(typeof(Mine));
+        cm.AddKnownType(typeof(StarPort));
+    });
+    builder.Services.AddSingleton<IMongoClient, MongoClient>(
+        _ => new MongoClient(builder.Configuration["MongoDB:BaseUri"])
+    );
+    builder.Services.AddSingleton<IUserRepository, MongoDBUserRepository>();
+}
+
+else
+{
+    builder.Services.AddSingleton<IUserRepository, LocalMemoryUserRepository>();
+    builder.Services.Configure<AdminCredentials>(builder.Configuration.GetSection("AdminCredentials"));
+    builder.Services.Configure<Wormholes>(builder.Configuration.GetSection("Wormholes"));
+}
+
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<IShardGateway, ShardGatewayHttpClientFactory>();
+
+builder.Services.AddSingleton<SectorService>();
+builder.Services.AddSingleton<UserService>();
+builder.Services.AddSingleton<UnitService>();
+builder.Services.AddSingleton<BuildingService>();
+builder.Services.AddSingleton<CombatService>();
+
+builder.Services.AddHostedService<CombatBackgroundService>();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
+
+namespace Shard.RayanCedric.API
+{
+    public class Program
+    {
+
+    }
+}
