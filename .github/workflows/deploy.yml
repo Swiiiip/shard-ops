@@ -41,13 +41,13 @@ jobs:
           echo "API_VERSION=$VERSION"
 
       - name: Log in to Docker Hub
-        run: echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+        run: echo "${{ env.DOCKERHUB_TOKEN }}" | docker login -u "${{ env.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Build and tag Docker image
         run: |
           docker build \
             --build-arg API_VERSION=${API_VERSION} \
-            -t ${DOCKERHUB_USERNAME}/shard-api:${API_VERSION} .
+            -t "${{ env.DOCKERHUB_USERNAME }}"/shard-api:${API_VERSION} .
 
       - name: Push Docker image to Docker Hub
-        run: docker push ${DOCKERHUB_USERNAME}/shard-api:${API_VERSION}
+        run: docker push "${{ env.DOCKERHUB_USERNAME }}"/shard-api:${API_VERSION}
