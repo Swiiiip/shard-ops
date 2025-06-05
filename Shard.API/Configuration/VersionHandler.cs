@@ -1,4 +1,4 @@
-namespace DefaultNamespace;
+namespace Shard.API.Configuration;
 
 public static class VersionHandler
 {
