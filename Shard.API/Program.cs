@@ -24,6 +24,13 @@ using SystemClock = Shard.Shared.Core.SystemClock;
 using UserService = Shard.API.Services.UserService;
 
 string version = VersionHandler.GetVersion();
+
+if (args.Length == 1 && args[0] == "--version")
+{
+    Console.WriteLine(version);
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
