@@ -48,4 +48,7 @@ jobs:
             -t "${{ env.DOCKERHUB_USERNAME }}"/shard-api:${API_VERSION} "${{ env.DOCKERHUB_USERNAME }}"/shard-api:latest .
 
       - name: Push Docker image to Docker Hub
-        run: docker push "${{ env.DOCKERHUB_USERNAME }}"/shard-api:${API_VERSION}
+        run: |
+          docker push "${{ env.DOCKERHUB_USERNAME }}"/shard-api:${API_VERSION}
+          docker push "${{ env.DOCKERHUB_USERNAME }}"/shard-api:latest
+        
