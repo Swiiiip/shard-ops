@@ -4,14 +4,12 @@ on:
   push:
     branches: [main]
 
-env:
-  ASPNETCORE_ENVIRONMENT: Production
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
+    environment: PRD
     env:
+      ASPNETCORE_ENVIRONMENT: ${{ secrets.ASPNETCORE_ENVIRONMENT }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
       GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
