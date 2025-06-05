@@ -1,0 +1,21 @@
+# GitVersion configuration for semantic versioning
+# See https://gitversion.net/docs/configuration/ for all options
+mode: ContinuousDeployment
+branches:
+  main:
+    regex: ^main$
+    increment: Minor
+    prevent-increment-of-merged-branch-version: true
+    track-merge-target: false
+    is-mainline: true
+  feature:
+    regex: ^features?[/-]
+    increment: Minor
+    source-branches: ['main']
+  fix:
+    regex: ^fix(es)?[/-]
+    increment: Patch
+    source-branches: ['main']
+ignore:
+  sha: []
+commit-message-incrementing: Enabled
