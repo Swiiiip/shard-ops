@@ -5,6 +5,9 @@ using UserService = Shard.API.Services.UserService;
 
 namespace Shard.API.Controllers;
 
+/// <summary>
+/// Controller for managing users.
+/// </summary>
 [Route("[controller]/{userId}")]
 [ApiController]
 public class UsersController : ControllerBase
@@ -18,6 +21,14 @@ public class UsersController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Creates or updates a user.
+    /// </summary>
+    /// <param name="userId">Id of the user to create or update.</param>
+    /// <param name="user">User details.</param>
+    /// <returns>The created or updated user.</returns>
+    /// <response code="200">Returns the user after creation or update.</response>
+    /// <response code="400">If the request is invalid.</response>
     [HttpPut]
     public ActionResult<UserContract> CreateUser(string userId, [FromBody] UserContract user)
     {
@@ -42,6 +53,14 @@ public class UsersController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Gets a user by ID.
+    /// </summary>
+    /// <param name="userId">Id of the user to retrieve.</param>
+    /// <returns>The user.</returns>
+    /// <response code="200">Returns the user.</response>
+    /// <response code="400">If the userId is invalid.</response>
+    /// <response code="404">If the user is not found.</response>
     [HttpGet]
     public ActionResult<UserContract> GetUser(string userId)
     {

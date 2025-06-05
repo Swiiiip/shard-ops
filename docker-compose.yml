@@ -1,13 +1,16 @@
-﻿services:
+﻿version: '3.8'
+
+services:
   shard-api:
     build:
       context: .
       dockerfile: Dockerfile
+    image: shard-api:latest
     ports:
-      - "8080:80" 
+      - "8080:80"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - MongoDB__BaseUri=mongodb://mongo:27017 
+      - ASPNETCORE_ENVIRONMENT=${ENVIRONMENT}
+      - MongoDB__BaseUri=mongodb://mongo:27017
     depends_on:
       - mongo
 
@@ -17,7 +20,28 @@
     ports:
       - "27017:27017"
     volumes:
-      - ./mongo-data:/data/db 
-  
+      - ./mongo-data:/data/db
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - shard-api
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_SECURITY_ADMIN_USER: admin
+    depends_on:
+      - prometheus
+
 volumes:
   mongo-data:
