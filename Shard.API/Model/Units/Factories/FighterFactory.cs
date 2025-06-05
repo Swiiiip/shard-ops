@@ -1,0 +1,12 @@
+using Shard.API.Model.Sector;
+using Shard.API.Model.Units.CombatUnits;
+
+namespace Shard.API.Model.Units.Factories;
+
+public class FighterFactory : IUnitFactory
+{
+    public Unit CreateUnit(StarSystem starSystem, Planet? planet)
+    {
+        return new Fighter(starSystem, planet);
+    }
+}
