@@ -1,3 +1,4 @@
+using Prometheus;
 using System.Reflection;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;
@@ -22,6 +23,14 @@ using CombatService = Shard.API.Services.CombatService;
 using SystemClock = Shard.Shared.Core.SystemClock;
 using UserService = Shard.API.Services.UserService;
 
+string version = VersionHandler.GetVersion();
+
+if (args.Length == 1 && args[0] == "--version")
+{
+    Console.WriteLine(version);
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
@@ -34,9 +43,9 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("V7", new OpenApiInfo
+    options.SwaggerDoc(version, new OpenApiInfo
     {
-        Version = "V7",
+        Version = version,
         Title = "Shard.API",
     });
 
@@ -50,9 +59,9 @@ builder.Services.AddAuthentication("Basic")
 builder.Services.AddSingleton<IClock, SystemClock>();
 builder.Services.AddSingleton<ISectorRepository, SectorRepository>();
 
-var useMongoDB = builder.Environment.IsProduction();
+var isProduction = builder.Environment.IsProduction();
 
-if (useMongoDB)
+if (isProduction)
 {
     BsonClassMap.RegisterClassMap<Unit>(cm =>
     {
@@ -107,17 +116,26 @@ builder.Services.AddHostedService<CombatBackgroundService>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint($"/swagger/{version}/swagger.json", $"Shard.API {version}");
+});
+
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+app.UseRouting();
+
+app.UseHttpMetrics();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapMetrics();
+});
 
 app.Run();
 
