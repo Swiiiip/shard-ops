@@ -5,12 +5,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: shard-api:latest
+      args:
+        API_VERSION: ${API_VERSION}
+    image: ${DOCKERHUB_USERNAME}/shard-api:${API_VERSION}
     ports:
       - "8080:80"
     environment:
-      - ASPNETCORE_ENVIRONMENT=${ENVIRONMENT}
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - MongoDB__BaseUri=mongodb://mongo:27017
+      - API_VERSION=${API_VERSION}
     depends_on:
       - mongo
 
@@ -38,8 +41,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
       GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
     depends_on:
       - prometheus
 
