@@ -1,5 +1,6 @@
 using Prometheus;
 using System.Reflection;
+using DotNetEnv;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -23,15 +24,27 @@ using CombatService = Shard.API.Services.CombatService;
 using SystemClock = Shard.Shared.Core.SystemClock;
 using UserService = Shard.API.Services.UserService;
 
-string version = VersionHandler.GetVersion();
+var builder = WebApplication.CreateBuilder(args);
 
-if (args.Length == 1 && args[0] == "--version")
+var isProd = builder.Environment.IsProduction();
+string version;
+
+if (isProd)
+{
+    version = VersionHandler.GetVersion();
+}else
+{
+    version = "Development";
+    
+    var envPath = Path.Combine(Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.FullName, ".env");
+    Env.Load(envPath);
+}
+
+if (args is ["--version"])
 {
     Console.WriteLine(version);
     return;
 }
-
-var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -59,9 +72,7 @@ builder.Services.AddAuthentication("Basic")
 builder.Services.AddSingleton<IClock, SystemClock>();
 builder.Services.AddSingleton<ISectorRepository, SectorRepository>();
 
-var isProduction = builder.Environment.IsProduction();
-
-if (isProduction)
+if (isProd)
 {
     BsonClassMap.RegisterClassMap<Unit>(cm =>
     {
