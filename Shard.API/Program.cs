@@ -136,9 +136,9 @@ app.UseSwaggerUI(c =>
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
-app.UseAuthorization();
 
 app.UseRouting();
+app.UseAuthorization();
 
 app.UseHttpMetrics();
 
