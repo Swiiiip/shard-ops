@@ -1,10 +1,5 @@
 services:
   shard-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        API_VERSION: ${API_VERSION}
     image: ${DOCKERHUB_USERNAME}/shard-api:latest
     ports:
       - "8080:80"
