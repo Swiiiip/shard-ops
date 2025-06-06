@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
@@ -37,11 +37,4 @@
     <ProjectReference Include="..\Shard.Shared.Core\Shard.Shared.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="Asserts\*.cs" />
-    <Compile Include="Clock\*.cs" />
-    <Compile Include="TestEntities\*.cs" />
-    <Compile Include="*.cs" />
-  </ItemGroup>
-  
 </Project>
