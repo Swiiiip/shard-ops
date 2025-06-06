@@ -5,7 +5,11 @@ on:
     branches: [main]
 
 jobs:
+  test-and-lint:
+    uses: ./.github/workflows/test-and-lint.yml
+
   build-and-deploy:
+    needs: test-and-lint
     runs-on: ubuntu-latest
     environment: PRD
     env:
@@ -17,10 +21,6 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-        
-      - name: Test and lint
-        uses: ./.github/workflows/test-and-lint.yml
-        continue-on-error: true
 
       - name: Calculate version based on pushes this month
         id: version
