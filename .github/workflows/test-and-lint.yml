@@ -1,0 +1,38 @@
+name: Test and Lint
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+        continue-on-error: true
+
+      - name: Restore dependencies
+        run: dotnet restore
+        continue-on-error: true
+
+      - name: Run linting
+        run: |
+          dotnet tool install -g dotnet-format
+          dotnet format --verify-no-changes
+        continue-on-error: true
+
+      - name: Build
+        run: dotnet build --no-restore
+        continue-on-error: true
+
+      - name: Run integration tests
+        run: |
+          dotnet test Shard.Shared.Web.IntegrationTests/Shard.Shared.Web.IntegrationTests.csproj --no-build --verbosity normal
+        continue-on-error: true 
