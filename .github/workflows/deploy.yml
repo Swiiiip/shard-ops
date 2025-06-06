@@ -21,6 +21,10 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        
+      - name: Test and lint
+        uses: ./.github/workflows/test-and-lint.yml
+        continue-on-error: true
 
       - name: Calculate version based on pushes this month
         id: version
