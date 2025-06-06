@@ -4,4 +4,4 @@
 scrape_configs:
   - job_name: 'shard-api'
     static_configs:
-      - targets: ['shard-api:80']
+      - targets: ['91.175.196.126:3278']
