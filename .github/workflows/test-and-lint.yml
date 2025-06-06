@@ -8,7 +8,7 @@ on:
 jobs:
   test-and-lint:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -17,23 +17,18 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
-        continue-on-error: true
 
       - name: Restore dependencies
         run: dotnet restore
-        continue-on-error: true
 
       - name: Run linting
         run: |
           dotnet tool install -g dotnet-format
-          dotnet format --verify-no-changes
-        continue-on-error: true
+          export PATH="$PATH:/home/runner/.dotnet/tools"
+          dotnet format shard.sln --verify-no-changes || true
 
       - name: Build
-        run: dotnet build --no-restore
-        continue-on-error: true
+        run: dotnet build --configuration Release --no-restore
 
-      - name: Run integration tests
-        run: |
-          dotnet test Shard.Shared.Web.IntegrationTests/Shard.Shared.Web.IntegrationTests.csproj --no-build --verbosity normal
-        continue-on-error: true 
+      - name: Run all tests (unit + integration)
+        run: dotnet test --configuration Release --no-build --verbosity normal
